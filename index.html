@@ -95,7 +95,7 @@
   }
 
   footer div {
-    line-height: 1.6;
+    line-height: 1.15;
   }
 
   footer a {
@@ -126,15 +126,30 @@
   <script>
     const images = [
       "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-01.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-02.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-03.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-04.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-05.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-06.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-07.jpg?v=1784282511",
       "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-08.jpg?v=1784282511",
-      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-09.jpg?v=1784282511"
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-15.jpg?v=1784299777",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-14.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-12.jpg?v=1784299777",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-18.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-20.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-19.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-10.jpg?v=1784299777",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-16.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-13.jpg?v=1784299778",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-17.jpg?v=1784299778"
     ];
+
+    // Fisher-Yates shuffle: ordine random ad ogni caricamento della pagina
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const shuffledImages = shuffle(images);
 
     const LOGO_WHITE = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_white.png?v=1784283359";
     const LOGO_BLACK = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359";
@@ -143,9 +158,9 @@
     const logoImg = document.getElementById('logoImg');
     const siteFooter = document.getElementById('siteFooter');
     const slides = [];
-    const isDarkBehind = new Array(images.length).fill(false);
+    const isDarkBehind = new Array(shuffledImages.length).fill(false);
 
-    images.forEach((url, i) => {
+    shuffledImages.forEach((url, i) => {
       const div = document.createElement('div');
       div.className = 'slide' + (i === 0 ? ' active' : '');
       div.style.backgroundImage = `url('${url}')`;
@@ -191,7 +206,7 @@
       });
     }
 
-    Promise.all(images.map(analyzeBrightness)).then((results) => {
+    Promise.all(shuffledImages.map(analyzeBrightness)).then((results) => {
       results.forEach((dark, i) => { isDarkBehind[i] = dark; });
       updateLogo(0);
     });
@@ -205,7 +220,7 @@
     }
 
     // preload di tutte le immagini in background, senza bloccare il primo render
-    images.forEach(url => { const im = new Image(); im.src = url; });
+    shuffledImages.forEach(url => { const im = new Image(); im.src = url; });
 
     let current = 0;
     const INTERVAL = 5000;
