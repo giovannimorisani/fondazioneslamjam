@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fondazione Slam Jam</title>
-<link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_IG__3.png?v=1782936810">
+<link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359">
 <link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-01.jpg?v=1784282511" fetchpriority="high">
 <style>
   * { box-sizing: border-box; }
@@ -30,7 +30,7 @@
     position: relative;
     width: 100%;
     height: 100dvh;
-    isolation: isolate; /* confina il blend mode del logo a questo contenitore */
+    isolation: isolate;
     overflow: hidden;
   }
 
@@ -58,25 +58,12 @@
     width: min(150px, 32vw);
     z-index: 5;
     pointer-events: none;
-    mix-blend-mode: difference;
   }
 
   .logo-overlay img {
     width: 100%;
     height: auto;
     display: block;
-    filter: invert(1); /* parte da bianco puro: il blend fa il resto */
-  }
-
-  .bottom-fade {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 140px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
-    z-index: 3;
-    pointer-events: none;
   }
 
   footer {
@@ -89,6 +76,15 @@
     color: #ffffff;
     text-align: left;
     z-index: 4;
+    transition: color 0.6s ease;
+  }
+
+  footer.on-light {
+    color: #0a0a0a;
+  }
+
+  footer.on-light a {
+    color: #0a0a0a;
   }
 
   footer div {
@@ -109,15 +105,13 @@
 
   <div class="stage" id="stage">
 
-    <div class="logo-overlay">
-      <img src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_IG__3.png?v=1782936810" alt="Fondazione Slam Jam">
+    <div class="logo-overlay" id="logoOverlay">
+      <img id="logoImg" src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359" alt="Fondazione Slam Jam">
     </div>
 
-    <div class="bottom-fade"></div>
-
-    <footer>
-      <div><a href="https://instagram.com/fondazioneslamjam" target="_blank" rel="noopener">@fondazioneslamjam</a></div>
-      <div><a href="mailto:info@fondazioneslamjam.org">info@fondazioneslamjam.org</a></div>
+    <footer id="siteFooter">
+      <div><a href="https://instagram.com/fondazioneslamjam" target="_blank" rel="noopener">@FONDAZIONESLAMJAM</a></div>
+      <div><a href="mailto:info@fondazioneslamjam.org">INFO@FONDAZIONESLAMJAM.ORG</a></div>
     </footer>
 
   </div>
@@ -135,8 +129,14 @@
       "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-09.jpg?v=1784282511"
     ];
 
+    const LOGO_WHITE = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_white.png?v=1784283359";
+    const LOGO_BLACK = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359";
+
     const stage = document.getElementById('stage');
+    const logoImg = document.getElementById('logoImg');
+    const siteFooter = document.getElementById('siteFooter');
     const slides = [];
+    const isDarkBehind = new Array(images.length).fill(false);
 
     images.forEach((url, i) => {
       const div = document.createElement('div');
@@ -145,6 +145,57 @@
       stage.insertBefore(div, stage.firstChild);
       slides.push(div);
     });
+
+    // Analizza la luminosità della zona centrale di ogni foto (dove sta il logo)
+    // per decidere se il logo deve essere scuro o invertito in chiaro.
+    function analyzeBrightness(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          try {
+            const size = 40;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // ritaglio centrale simile a background-size: cover
+            const ratio = Math.max(size / img.width, size / img.height);
+            const w = img.width * ratio;
+            const h = img.height * ratio;
+            const x = (size - w) / 2;
+            const y = (size - h) / 2;
+            ctx.drawImage(img, x, y, w, h);
+
+            const data = ctx.getImageData(0, 0, size, size).data;
+            let total = 0;
+            for (let p = 0; p < data.length; p += 4) {
+              total += 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
+            }
+            const avg = total / (data.length / 4);
+            resolve(avg < 130); // true = zona scura
+          } catch (e) {
+            resolve(false); // fallback: se il canvas fallisce (es. CORS), non invertire
+          }
+        };
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    }
+
+    Promise.all(images.map(analyzeBrightness)).then((results) => {
+      results.forEach((dark, i) => { isDarkBehind[i] = dark; });
+      updateLogo(0);
+    });
+
+    function updateLogo(index) {
+      const dark = isDarkBehind[index];
+      // sfondo scuro -> logo bianco per contrasto, e viceversa
+      logoImg.src = dark ? LOGO_WHITE : LOGO_BLACK;
+      // il testo segue lo stesso stato del logo: bianco su scuro, nero su chiaro
+      siteFooter.classList.toggle('on-light', !dark);
+    }
 
     // preload di tutte le immagini in background, senza bloccare il primo render
     images.forEach(url => { const im = new Image(); im.src = url; });
@@ -157,6 +208,7 @@
       slides[next].classList.add('active');
       slides[current].classList.remove('active');
       current = next;
+      updateLogo(current);
     }, INTERVAL);
   </script>
 
