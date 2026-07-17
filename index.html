@@ -168,27 +168,42 @@
       slides.push(div);
     });
 
-    // Analizza la luminosità della zona centrale di ogni foto (dove sta il logo)
-    // per decidere se il logo deve essere scuro o invertito in chiaro.
+    // Analizza la luminosità SOLO nella zona dove sta effettivamente il logo,
+    // calcolando il crop esatto come lo vede lo schermo reale (non un quadrato),
+    // così il colore del logo si basa su cosa c'è davvero dietro di lui.
     function analyzeBrightness(url) {
       return new Promise((resolve) => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
           try {
-            const size = 40;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const iw = img.naturalWidth;
+            const ih = img.naturalHeight;
+
+            // stesso fattore di scala che userebbe background-size: cover
+            const coverScale = Math.max(vw / iw, vh / ih);
+
+            // dimensione reale del logo sullo schermo (stessa regola del CSS: min(150px, 32vw))
+            const logoScreenSize = Math.min(150, vw * 0.32) * 1.6; // margine extra intorno al logo
+
+            // converto quella dimensione da pixel-schermo a pixel-immagine sorgente
+            const sampleSizeInImg = logoScreenSize / coverScale;
+
+            const cropX = Math.max(0, (iw - sampleSizeInImg) / 2);
+            const cropY = Math.max(0, (ih - sampleSizeInImg) / 2);
+            const cropW = Math.min(sampleSizeInImg, iw);
+            const cropH = Math.min(sampleSizeInImg, ih);
+
+            const size = 30;
             const canvas = document.createElement('canvas');
             canvas.width = size;
             canvas.height = size;
             const ctx = canvas.getContext('2d');
 
-            // ritaglio centrale simile a background-size: cover
-            const ratio = Math.max(size / img.width, size / img.height);
-            const w = img.width * ratio;
-            const h = img.height * ratio;
-            const x = (size - w) / 2;
-            const y = (size - h) / 2;
-            ctx.drawImage(img, x, y, w, h);
+            // disegno SOLO il ritaglio centrale (area del logo), scalato nel canvas piccolo
+            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, size, size);
 
             const data = ctx.getImageData(0, 0, size, size).data;
             let total = 0;
