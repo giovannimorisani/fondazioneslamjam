@@ -5,58 +5,160 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fondazione Slam Jam</title>
 <link rel="icon" type="image/png" href="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_IG__3.png?v=1782936810">
+<link rel="preload" as="image" href="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-01.jpg?v=1784282511" fetchpriority="high">
 <style>
+  * { box-sizing: border-box; }
+
+  @font-face {
+    font-family: 'SJ Helvetica';
+    src: url('https://cdn.shopify.com/s/files/1/0576/7705/4136/files/SJHelvetica-Roman.otf?v=1710498034') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
     height: 100%;
-    background: #fdfdfd;
-    display: flex;
-    flex-direction: column;
+    background: #0a0a0a;
+    overflow: hidden;
+    font-family: 'SJ Helvetica', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   }
-  .frame {
-    flex: 1;
+
+  .stage {
+    position: relative;
     width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 8vw;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 100dvh;
+    isolation: isolate; /* confina il blend mode del logo a questo contenitore */
+    overflow: hidden;
   }
-  img {
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 1.4s ease;
+    will-change: opacity;
+  }
+
+  .slide.active {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(150px, 32vw);
+    z-index: 5;
+    pointer-events: none;
+    mix-blend-mode: difference;
+  }
+
+  .logo-overlay img {
     width: 100%;
     height: auto;
     display: block;
+    filter: invert(1); /* parte da bianco puro: il blend fa il resto */
   }
+
+  .bottom-fade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 140px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 100%);
+    z-index: 3;
+    pointer-events: none;
+  }
+
   footer {
-    padding: 24px 32px;
-    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 20px 28px;
     font-size: 13px;
     letter-spacing: 0.02em;
-    color: #1a1a1a;
+    color: #ffffff;
     text-align: left;
+    z-index: 4;
   }
-  footer a {
-    color: #1a1a1a;
-    text-decoration: none;
-  }
-  footer a:hover {
-    text-decoration: underline;
-  }
+
   footer div {
     line-height: 1.6;
+  }
+
+  footer a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
   }
 </style>
 </head>
 <body>
-  <div class="frame">
-    <img src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_IG__3.png?v=1782936810" alt="Slam Jam logo">
+
+  <div class="stage" id="stage">
+
+    <div class="logo-overlay">
+      <img src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_IG__3.png?v=1782936810" alt="Fondazione Slam Jam">
+    </div>
+
+    <div class="bottom-fade"></div>
+
+    <footer>
+      <div><a href="https://instagram.com/fondazioneslamjam" target="_blank" rel="noopener">@fondazioneslamjam</a></div>
+      <div><a href="mailto:info@fondazioneslamjam.org">info@fondazioneslamjam.org</a></div>
+    </footer>
+
   </div>
-  <footer>
-    <div><a href="https://instagram.com/fondazioneslamjam" target="_blank" rel="noopener">ig: @fondazioneslamjam</a></div>
-    <div><a href="mailto:info@fondazioneslamjam.org">mail: info@fondazioneslamjam.org</a></div>
-  </footer>
+
+  <script>
+    const images = [
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-01.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-02.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-03.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-04.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-05.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-06.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-07.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-08.jpg?v=1784282511",
+      "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-09.jpg?v=1784282511"
+    ];
+
+    const stage = document.getElementById('stage');
+    const slides = [];
+
+    images.forEach((url, i) => {
+      const div = document.createElement('div');
+      div.className = 'slide' + (i === 0 ? ' active' : '');
+      div.style.backgroundImage = `url('${url}')`;
+      stage.insertBefore(div, stage.firstChild);
+      slides.push(div);
+    });
+
+    // preload di tutte le immagini in background, senza bloccare il primo render
+    images.forEach(url => { const im = new Image(); im.src = url; });
+
+    let current = 0;
+    const INTERVAL = 5000;
+
+    setInterval(() => {
+      const next = (current + 1) % slides.length;
+      slides[next].classList.add('active');
+      slides[current].classList.remove('active');
+      current = next;
+    }, INTERVAL);
+  </script>
+
 </body>
 </html>
