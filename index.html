@@ -33,6 +33,15 @@
     font-family: 'SJ Helvetica', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   }
 
+  /* Modalità senza slideshow: sfondo bianco fisso, logo e testo sempre neri */
+  body.no-slideshow {
+    background: #ffffff;
+  }
+
+  body.no-slideshow .stage {
+    background: #ffffff;
+  }
+
   .stage {
     position: relative;
     width: 100%;
@@ -108,12 +117,12 @@
   }
 </style>
 </head>
-<body>
+<body id="pageBody">
 
   <div class="stage" id="stage">
 
     <div class="logo-overlay" id="logoOverlay">
-      <img id="logoImg" src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784300611" alt="Fondazione Slam Jam">
+      <img id="logoImg" src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359" alt="Fondazione Slam Jam">
     </div>
 
     <footer id="siteFooter">
@@ -124,6 +133,12 @@
   </div>
 
   <script>
+    // ============================================================
+    // INTERRUTTORE PRINCIPALE: metti false per pagina bianca fissa
+    // senza slideshow (solo logo nero + footer nero, statico).
+    // ============================================================
+    const SHOW_SLIDESHOW = false;
+
     const images = [
       "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-01.jpg?v=1784282511",
       "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/slide-08.jpg?v=1784282511",
@@ -149,14 +164,25 @@
       return a;
     }
 
-    const shuffledImages = shuffle(images);
-
-    const LOGO_WHITE = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_white.png?v=1784300607";
-    const LOGO_BLACK = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784300611";
-
-    const stage = document.getElementById('stage');
     const logoImg = document.getElementById('logoImg');
     const siteFooter = document.getElementById('siteFooter');
+    const LOGO_WHITE = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_white.png?v=1784283359";
+    const LOGO_BLACK = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359";
+
+    if (!SHOW_SLIDESHOW) {
+      // Modalità statica: sfondo bianco, logo e testo sempre neri, niente foto/JS extra
+      document.getElementById('pageBody').classList.add('no-slideshow');
+      logoImg.src = LOGO_BLACK;
+      siteFooter.classList.add('on-light');
+    } else {
+      // Modalità slideshow: tutta la logica sotto
+      runSlideshow();
+    }
+
+    function runSlideshow() {
+    const shuffledImages = shuffle(images);
+
+    const stage = document.getElementById('stage');
     const slides = [];
     const isDarkBehind = new Array(shuffledImages.length).fill(false);
 
@@ -247,6 +273,7 @@
       current = next;
       updateLogo(current);
     }, INTERVAL);
+    } // fine runSlideshow()
   </script>
 
 </body>
