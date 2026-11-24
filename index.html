@@ -58,7 +58,7 @@
 
   .slide.active { opacity: 1; z-index: 1; }
 
-  /* ---------- LOGO (+ newsletter ancorata sotto di lui) ---------- */
+  /* ---------- LOGO ---------- */
   .logo-overlay {
     position: absolute;
     top: 50%;
@@ -75,38 +75,32 @@
     display: block;
   }
 
-  /* ---------- NEWSLETTER ---------- */
+  /* ---------- NEWSLETTER (in basso a destra, sopra il footer) ---------- */
   .newsletter {
     position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-top: 22px;
+    right: 28px;
+    bottom: 72px;               /* sopra il footer, non copre "Privacy Policy" */
     width: min(280px, 86vw);
     padding: 14px 16px 10px;
-    transform: translate(-50%, 8px);
+    transform: translateY(8px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity .6s ease, transform .6s ease, visibility .6s, color .6s ease, background .6s ease;
+    transition: opacity .6s ease, transform .6s ease, visibility .6s;
     color: #ffffff;
-    background: rgba(0, 0, 0, 0.42);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: #000000;        /* nero pieno, non trasparente */
+    font-family: 'SJ Helvetica', "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 11px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
+    z-index: 6;
   }
 
   .newsletter.show {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translate(-50%, 0);
-  }
-
-  .newsletter.on-light {
-    color: #0a0a0a;
-    background: rgba(255, 255, 255, 0.55);
+    transform: translateY(0);
   }
 
   .nl-close {
@@ -242,6 +236,14 @@
   @media (max-width: 640px) {
     footer { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px 20px; }
     footer .legal { text-align: left; }
+
+    /* Su mobile il footer è più alto: popup a tutta larghezza, sopra il footer */
+    .newsletter {
+      left: 20px;
+      right: 20px;
+      width: auto;
+      bottom: 108px;
+    }
   }
 </style>
 </head>
@@ -251,21 +253,21 @@
 
     <div class="logo-overlay" id="logoOverlay">
       <img id="logoImg" src="https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359" alt="Fondazione Slam Jam">
+    </div>
 
-      <!-- Popup newsletter: ancorato sotto il logo, appare dopo qualche secondo -->
-      <div class="newsletter" id="newsletter" role="dialog" aria-label="Newsletter signup">
-        <button class="nl-close" id="nlClose" type="button" aria-label="Close">×</button>
-        <form id="nlForm" novalidate>
-          <label class="nl-title" for="nlEmail">Subscribe to our newsletter</label>
-          <div class="nl-row">
-            <input type="email" id="nlEmail" name="email" placeholder="Your email" autocomplete="email" inputmode="email" required>
-            <button type="submit" class="nl-submit" id="nlSubmit" aria-label="Subscribe">→</button>
-          </div>
-          <p class="nl-note">By subscribing you agree to our <a href="https://www.iubenda.com/privacy-policy/POLICY_ID" class="iubenda-nostyle iubenda-noiframe iubenda-embed" title="Privacy Policy">Privacy Policy</a>.</p>
-          <p class="nl-msg" id="nlMsg" role="status" aria-live="polite"></p>
-        </form>
-        <p class="nl-thanks" id="nlThanks" role="status" aria-live="polite" hidden>Thank you.<br>You&rsquo;re now subscribed.</p>
-      </div>
+    <!-- Popup newsletter: in basso a destra, appare dopo qualche secondo -->
+    <div class="newsletter" id="newsletter" role="dialog" aria-label="Newsletter signup">
+      <button class="nl-close" id="nlClose" type="button" aria-label="Close">×</button>
+      <form id="nlForm" novalidate>
+        <label class="nl-title" for="nlEmail">Subscribe to our newsletter</label>
+        <div class="nl-row">
+          <input type="email" id="nlEmail" name="email" placeholder="Your email" autocomplete="email" inputmode="email" required>
+          <button type="submit" class="nl-submit" id="nlSubmit" aria-label="Subscribe">→</button>
+        </div>
+        <p class="nl-note">By subscribing you agree to our <a href="https://www.iubenda.com/privacy-policy/POLICY_ID" class="iubenda-nostyle iubenda-noiframe iubenda-embed" title="Privacy Policy">Privacy Policy</a>.</p>
+        <p class="nl-msg" id="nlMsg" role="status" aria-live="polite"></p>
+      </form>
+      <p class="nl-thanks" id="nlThanks" role="status" aria-live="polite" hidden>Thank you.<br>You&rsquo;re now subscribed.</p>
     </div>
 
     <footer id="siteFooter">
@@ -316,11 +318,10 @@
     const LOGO_WHITE = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_white.png?v=1784283359";
     const LOGO_BLACK = "https://cdn.shopify.com/s/files/1/0576/7705/4136/files/FONDAZIONE_web_black.png?v=1784283359";
 
-    // Applica il tema (chiaro/scuro) a logo, footer e popup newsletter insieme
+    // Applica il tema (chiaro/scuro) a logo e footer. Il popup newsletter resta sempre nero.
     function applyTheme(dark) {
       logoImg.src = dark ? LOGO_WHITE : LOGO_BLACK;
       siteFooter.classList.toggle('on-light', !dark);
-      newsletter.classList.toggle('on-light', !dark);
     }
 
     if (!SHOW_SLIDESHOW) {
